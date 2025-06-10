@@ -1,6 +1,7 @@
 from flask          import Flask
 from flask          import render_template
 from flask          import redirect
+from flask          import request
 from libsql_client  import create_client_sync
 from dotenv         import load_dotenv
 import os
@@ -29,7 +30,7 @@ def connect_db():
 
 
 #-----------------------------------------------------------
-# Home Page with list of things
+# Home Page with list of thing
 #-----------------------------------------------------------
 @app.get("/")
 def home():
@@ -65,6 +66,32 @@ def show_thing(id):
 @app.get("/new")
 def new_thing():
     return render_template("pages/thing-form.jinja")
+
+
+#-----------------------------------------------------------
+# Process a new thing
+#-----------------------------------------------------------
+@app.post("/add-thing")
+def add_thing():
+    # Get the data from the form
+    name = request.form.get("name")
+    price = request.form.get("price")
+
+    # Connect to the DB
+    client = connect_db()
+
+    # Add the thing to the DB
+    sql = "INSERT INTO things (name, price) VALUES (?, ?)"
+    values = [name, price]
+
+    result = client.execute(sql, values)
+
+    # Head to the home page to see the list
+    return redirect("/")
+
+
+
+
 
 
 #-----------------------------------------------------------
